@@ -1,4 +1,4 @@
-package omgsql
+package qsql
 
 import (
 	"fmt"
