@@ -119,6 +119,12 @@ type Query struct {
 	args      []interface{}
 	scan      []interface{}
 	scanFirst bool
+
+	postAction func(*sql.Rows, error)
+}
+
+func (q *Query) SetPostAction(postAction func(*sql.Rows, error)) {
+	q.postAction = postAction
 }
 
 func (q *Query) Scan(dest ...interface{}) *Query {
@@ -127,7 +133,18 @@ func (q *Query) Scan(dest ...interface{}) *Query {
 }
 
 func (q *Query) Exec(ctx context.Context) error {
-	rows, err := q.db.QueryContext(ctx, q.sql, q.args...)
+	var (
+		rows *sql.Rows
+		err  error
+	)
+
+	if q.postAction != nil {
+		defer func() {
+			q.postAction(rows, err)
+		}()
+	}
+
+	rows, err = q.db.QueryContext(ctx, q.sql, q.args...)
 	if err != nil {
 		return err
 	}
