@@ -123,8 +123,9 @@ type Query struct {
 	postAction func(*sql.Rows, error)
 }
 
-func (q *Query) SetPostAction(postAction func(*sql.Rows, error)) {
+func (q *Query) SetPostAction(postAction func(*sql.Rows, error)) *Query {
 	q.postAction = postAction
+	return q
 }
 
 func (q *Query) Scan(dest ...interface{}) *Query {
